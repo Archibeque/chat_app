@@ -1,0 +1,62 @@
+
+*{
+    margin:0px;
+    padding: 0px;
+    
+}
+
+.login__header{
+    display: flex;
+    /* background-color: red; */
+    
+}
+.login__left{
+    flex: 0.28;
+    /* background-color: rgb(235, 162, 235); */
+    background-color: rgb(206, 197, 197);
+}
+/* .login__right{
+
+} */
+
+/* .login__logo > form > input{
+    display: flex;
+    margin: 20px;
+    width: 90%;
+    outline-width: 0;
+} */
+.login__logo > form {
+    margin: 15px;
+}
+.login__right{
+    /* background-image: url(../../chat-people.jpg) ; */
+    background-size: contain;
+    flex: 0.72;
+    /* background-color: red; */
+    z-index: 9;
+}
+.overlay{
+    background: linear-gradient(to right top, #072f6b, #00358a, #003baa, #003ec9, #1c3fe7);
+    opacity: 0.8;
+    z-index: 10;
+}
+
+
+
+
+@media only screen and (max-width: 767px) {
+    .login__header > .login__right{
+       display: none;
+       
+    }
+    .login__left{
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        justify-content: center;
+        height: 100vh;
+    }
+}
+/*
+@media only screen and (min-width: 768px) and (max-width: 992px) {
+} */

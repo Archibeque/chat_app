@@ -1,0 +1,38 @@
+.sidebar__top{
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 20px;
+    color: white;
+    border-bottom: 3px solid #26282c;
+}
+
+.sidebar__header{
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 10px;
+    color: gray;
+    border-bottom: 2px solid #26282c;
+}
+
+.sidebar__touppercase{
+    font-size: large;
+    font-weight: 400;
+    text-transform: capitalize;
+    color: #fff;
+}
+
+/* #sidebar__scapy:-webkit-scrollbar {
+    display: none;
+}
+#sidebar__scapy{
+    overflow: scroll;
+    -ms-overflow-style: none; /*IE and Edge */
+    /* scrollbar-width: none; */
+        /*firefox  
+}*/
+ .sidebar__addchannel{
+    display: flex;
+    align-items: center;
+} 
