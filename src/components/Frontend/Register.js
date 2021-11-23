@@ -36,7 +36,6 @@ function Register() {
             password2: password2
         }
         console.log(newUser)
-    //    const  registerUser = (newUser) => {
         axios
         .post("/register", newUser)
         .then((res) => 
@@ -58,7 +57,6 @@ function Register() {
               console.log(err)
             }
         })
-        // .catch(err => console.log(err.body) )
 
 
     }
@@ -74,16 +72,7 @@ function Register() {
         <div className="login__header">
             <div className="login__left">
                 <div className="login__logo">
-                    <span>
-                        {/* {
-                            Error.map(({ msg }) => (
-                                <ListItem>
-                                   {msg}
-                                </ListItem>
-                            ))
-                        } */}
-                        
-                    </span>
+                    
                     <form noValidate onSubmit={handleSubmit} autoComplete="off" >
                     
                         <TextField
