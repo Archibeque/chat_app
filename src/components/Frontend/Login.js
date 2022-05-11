@@ -1,15 +1,15 @@
 import { Button, TextField } from '@material-ui/core'
 import React,{ useState, useEffect } from 'react'
 import './Register.css'
-import axios from '../axios'
-import { useHistory } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 // import setAuthToken from "../../utils/setAuthToken";
 // import jwt_decode from "jwt-decode";
-import { login } from '../../features/counter/userSlice'
+// import { login } from '../../features/counter/userSlice'
 // import { setChannelInfo } from '../../features/counter/appSlice'
 import { useDispatch, useSelector } from 'react-redux'
-import { setErrors, selectErrors } from '../../features/counter/errorSlice'
-// import { selectUser } from '../../features/counter/userSlice'
+import { login, reset } from "../../features/counter/authSlice";
+import { toast } from 'react-toastify'
+
 
 
 
@@ -18,16 +18,17 @@ function Login() {
 
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
-    const [errors, setErrors] = useState({})
-    const history = useHistory()
+    const history = useNavigate()
     const dispatch = useDispatch()
-    const error = useSelector(selectErrors)
-
+    
+    const { user, isLoading, isSuccess, isError, message } = useSelector(
+        (state) => state.auth
+      );
 
     const registerRoute = (e) =>{
         e.preventDefault()
 
-        history.push("/")
+        history("/")
     
     }
 
@@ -38,62 +39,72 @@ function Login() {
             email: email,
             password: password
         }
-        console.log(userdetails)
+        dispatch(login(userdetails))
         
-        axios
-        .post("/login", userdetails)
-        .then(res => {
-        // Save to localStorage
-        if(res.data){
-            dispatch(login({
-                id : res.data.logged._id,
-                name : res.data.logged.name,
-                email : res.data.logged.email
-            }))
-        }
-        else{
-            console.log(res.data)
-        }
+        // axios
+        // .post("/login", userdetails)
+        // .then(res => {
+        // // Save to localStorage
+        // if(res.data){
+        //     dispatch(login({
+        //         id : res.data.logged._id,
+        //         name : res.data.logged.name,
+        //         email : res.data.logged.email
+        //     }))
+        // }
+        // else{
+        //     console.log(res.data)
+        // }
         
             
-        })
-        .catch(err => {
-            if (err.response) {
-              // client received an error response (5xx, 4xx)
-              dispatch(setErrors({
-                errors: 
-                err.response.data,
-              }))
-            console.log(err.response.data)
-            } else {
-              // anything else
-              console.log(err)
-            }
-        })
+        // })
+        // .catch(err => {
+        //     if (err.response) {
+        //       // client received an error response (5xx, 4xx)
+        //       dispatch(setErrors({
+        //         errors: 
+        //         err.response.data,
+        //       }))
+        //     console.log(err.response.data)
+        //     } else {
+        //       // anything else
+        //       console.log(err)
+        //     }
+        // })
         
 
     }
 
-   
-    
+
+    useEffect(() => {
+        if (isSuccess) {
+            history("/dashboard")
+            toast.success(`Welcome`)
+        }
+        if (isError) {
+            toast.error(message)
+        }
+        dispatch(reset())
+    },[user, isSuccess, isLoading, isError, message])
 
 
-   
+
+    if(isLoading) {
+        <h1>Loading ...</h1>
+    }
+
+     
 
     return (
-            <div className="login__header">
+        
+        <div className="login__header">
+
+                {/* <Alert /> */}
+
             <div className="login__left">
+
+                
                 <div className="login__logo">
-                    <span>
-                        {/* {
-                            error.map(({ msg }) => (
-                                <ListItem key={msg}>
-                                    {msg}
-                                </ListItem>
-                                
-                            ))
-                        } */}
-                    </span>
         
                     <form noValidate onSubmit={handleSubmit} autoComplete="off" >                            
                         <TextField

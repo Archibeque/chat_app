@@ -1,33 +1,33 @@
-import React, { useEffect, useState, useRef } from 'react'
+import React, { useEffect, useState } from 'react'
 import ChatHeader from './ChatHeader'
 import AddCircleIcon from '@material-ui/icons/AddCircle'
 import CardGiftcardIcon from '@material-ui/icons/CardGiftcard'
-import EmojiEmotionsIcon from '@material-ui/icons/EmojiEmotions'
+// import EmojiEmotionsIcon from '@material-ui/icons/EmojiEmotions'
 import GifIcon from '@material-ui/icons/Gif'
 import './Chat.css'
 import Message from '../main/Message'
 import axios from '../axios'
 import { useSelector } from 'react-redux'
-import { selectUser } from '../../features/counter/userSlice'
+// import { selectUser } from '../../features/counter/userSlice'
 import { selectChannelId, selectChannelName } from '../../features/counter/appSlice'
 import { IconButton } from '@material-ui/core'
-import Pusher from 'pusher-js'
+// import Pusher from 'pusher-js'
 
 import 'emoji-mart/css/emoji-mart.css'
-import { Picker } from 'emoji-mart'
+// import { Picker } from 'emoji-mart'
 
 
 
 
 
-const pusher = new Pusher('5cfa35d1fb08dbbee50b', {
-    cluster: 'mt1'
-  });
+// const pusher = new Pusher('5cfa35d1fb08dbbee50b', {
+//     cluster: 'mt1'
+//   });
 
 
 function Chat() {
 
-    const user = useSelector(selectUser)
+    // const user = useSelector(selectUser)
     const channelId = useSelector(selectChannelId)
     const channelName = useSelector(selectChannelName)
     const [input, setInput] = useState('')
@@ -36,9 +36,9 @@ function Chat() {
 
 
 
-    const handleEmoji = () =>{
+    // const handleEmoji = () =>{
 
-    }
+    // }
 
 
     const getConversation = (channelId) => {
@@ -56,10 +56,14 @@ function Chat() {
         getConversation(channelId)
 
 
-        const channel = pusher.subscribe('conversation');
-        channel.bind('newmessage', function(data) {
-            getConversation(channelId)
-        });
+        // const channel = pusher.subscribe('conversation');
+        // channel.bind('newmessage', function(data) {
+        //     getConversation(channelId)
+        // });
+
+        // return (
+        //     pusher.unsubscribe
+        // )
 
     },[channelId])
 
@@ -67,7 +71,7 @@ function Chat() {
     const sendMessage = (e) => {
         e.preventDefault()
 
-        axios.post(`/new/message?id=${channelId}`, {
+        axios.put(`/new/message?id=${channelId}`, {
             message: input,
             timestamp: Date.now()
         })

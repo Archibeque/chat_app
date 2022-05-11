@@ -17,20 +17,21 @@ import ListItemText from '@material-ui/core/ListItemText';
 import EmojiPeopleIcon from '@material-ui/icons/EmojiPeople';
 import InboxIcon from '@material-ui/icons/MoveToInbox';
 import ContactMailIcon from '@material-ui/icons/ContactMail';
-import MailIcon from '@material-ui/icons/Mail';
+import GroupIcon from '@material-ui/icons/Group';
 import AddIcon from '@material-ui/icons/Add';
 import axios from '../axios'
 import { setChannelInfo } from '../../features/counter/appSlice';
-import { useDispatch } from 'react-redux'
-import { Fab } from '@material-ui/core';
-
-import Pusher from 'pusher-js'
+import { useDispatch, useSelector } from 'react-redux'
+import { Avatar, Fab } from '@material-ui/core';
 
 
+// import Pusher from 'pusher-js'
 
-const pusher = new Pusher('5cfa35d1fb08dbbee50b', {
-  cluster: 'mt1'
-});
+
+
+// const pusher = new Pusher('5cfa35d1fb08dbbee50b', {
+//   cluster: 'mt1'
+// });
 
 const useStyles = makeStyles(() =>
   createStyles({
@@ -58,6 +59,8 @@ export default function Sidebar() {
   const [input, setInput] = useState("")
   
   const dispatch = useDispatch()
+  
+  const { user } = useSelector((state) => state.auth)
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -76,7 +79,8 @@ export default function Sidebar() {
 
   const handleCreate = () => {
     if (input !== undefined){
-      axios.post('/new/channel',{
+      axios.post(`/new/channel/`,{
+        user: user,
         channelName: input
       })
         .then(() => {
@@ -86,14 +90,17 @@ export default function Sidebar() {
         setOpen(false)
     }
     else{
-        alert("Something went wrong")
         setOpen(false)
+        alert("Something went wrong")
     }
 
   }
 
+
+
   const getChannels = () => {
-    axios.get('/new/channelList')
+    axios.get(`/new/channelList/${user.id}`
+    )
       .then((res) => {
         console.log(res.data)
         setChannels(res.data)
@@ -105,14 +112,20 @@ export default function Sidebar() {
 
   useEffect(() => {
     getChannels()
+    
+
+    // const channel = pusher.subscribe('channels');
+    // channel.bind('newchannel', function(data) {
+    //   getChannels()
+    // });
 
 
-    const channel = pusher.subscribe('channels');
-    channel.bind('newchannel', function(data) {
-      getChannels()
-    });
+    // return (
+    //     pusher.unsubscribe
+      
+    // )
 
-  }, [])
+  },[])
 
 
 
@@ -166,7 +179,7 @@ export default function Sidebar() {
           {
           channels.map(({id, name}) => (
             <ListItem button key={id}>
-              <ListItemIcon>{name % 2 === 0 ? <InboxIcon color="primary" /> : <MailIcon  color="primary" />}</ListItemIcon>
+              <ListItemIcon>{name % 2 === 0 ? <InboxIcon color="primary" /> : <Avatar><GroupIcon color="primary"/></Avatar>}</ListItemIcon>
               <ListItemText primary={name} className="sidebar__touppercase" onClick={() => dispatch(setChannelInfo({
                 channelId: id,
                 channelName: name

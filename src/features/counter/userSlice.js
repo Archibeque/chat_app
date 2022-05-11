@@ -4,7 +4,7 @@ import { createSlice } from '@reduxjs/toolkit';
 export const userSlice = createSlice({
   name: 'user',
   initialState: {
-    user: true,
+    user: false,
   },
   // The `reducers` field lets us define reducers and generate associated actions
   reducers: {

@@ -1,40 +1,44 @@
 import React from 'react'
-import { useSelector } from 'react-redux'
 import Dashboard from './components/Dashboard/Dashboard';
 import Register from './components/Frontend/Register';
-import { selectUser } from './features/counter/userSlice'
-import { BrowserRouter as Router, Route } from "react-router-dom";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import Login from './components/Frontend/Login';
+import { useSelector } from "react-redux";
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 // import Frontend from './components/Frontend/Frontend'
 
 
-
 function App() {
-  const user = useSelector(selectUser);
+
+  const { user } = useSelector((state) => state.auth)
+  
+  // console.log(user)
+
 
   
 
   return (
-    <Router>
+    <>
+      <Router>
       <div className="app">
-        { user ? (
-          <>
-            <Dashboard />
-          </>
-        ): (
-          
-          // <Frontend />
-          <>
-            <Route exact path="/">
-              <Register />
-            </Route>
-            <Route exact path="/login">
-              <Login />
-            </Route>
-          </>
-        )}
-      </div>
-    </Router>
+        <Routes>
+              <>
+                
+                  <Route exact path="/dashboard" element={user?<Dashboard />: <login/>} />
+                  
+                  <Route exact path="/" element={user?<Dashboard />:<Register />} />
+                                  
+                  <Route exact path="/login" element={user?<Dashboard />:<Login />} />
+
+              </>
+            
+        </Routes>
+        </div>
+
+      </Router>
+      <ToastContainer />
+    </>
   );
 }
 
