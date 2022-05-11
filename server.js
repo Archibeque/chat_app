@@ -6,8 +6,24 @@ const User = require('./users')
 const bcrypt = require("bcryptjs");
 const passport = require("passport")
 var sess = require('express-session')
-// const usersRouter = require('./routes/users');
+const usersRouter = require('./routes/users');
 const Pusher = require("pusher");
+
+// const { mongoUri } = require('config/keys')
+
+class error {
+    constructor() {
+        this.count = 0;
+        this.lowesCount = 0;
+        this.items = {};
+    }
+
+    enqueue(element) {
+        this.items[this.count] = element;
+        this.count++;
+    }
+}
+
 
 
 // app config
@@ -29,56 +45,56 @@ app.use(passport.initialize())
 app.use(passport.session())
 require("./config/passport")(passport)
 
-const pusher = new Pusher({
-    appId: "1206828",
-    key: "5cfa35d1fb08dbbee50b",
-    secret: "da5ae2c696843cd96f6b",
-    cluster: "mt1",
-    useTLS: true
-  });
+// const pusher = new Pusher({
+//     appId: "1206828",
+//     key: "5cfa35d1fb08dbbee50b",
+//     secret: "da5ae2c696843cd96f6b",
+//     cluster: "mt1",
+//     useTLS: true
+//   });
 
 
 //dbconfig
-const connection_url = 'mongodb+srv://dblord:ready007@cluster0.xr77h.mongodb.net/chatbackenddb?retryWrites=true&w=majority'
+// const connection_url = 'mongodb+srv://dblord:ready007@cluster0.xr77h.mongodb.net/chatbackenddb?retryWrites=true&w=majority'
+const connection_url = 'mongodb://localhost:27017/emmanuel'
 
-
-// mongoose.connect(connection_url, {
-//     useNewUrlParser: true, 
-//     useUnifiedTopology: true, 
-//     useCreateIndex: true,
-//     useFindAndModify: false
-// })
-//     .then(console.log('mongodb connected'))
-//     .catch(err => console.log(err))
-
-
-const db = mongoose.connection
-
-
-db.once('open', () => {
-    console.log('db open')
-    const changeStream = db.collection('conversations').watch()
-
-    changeStream.on('change', (change) => {
-        if (change.operationType === "insert") {
-            pusher.trigger('channels', 'newchannel', {
-                'change' : change
-            })
-        }
-        else if (change.operationType === "update") {
-            pusher.trigger('conversation', 'newmessage', {
-                'change' : change
-            })
-        }
-
-        else {
-            console.log('error triggering pusher')
-        }
-        
-    })
-
-
+mongoose.connect(connection_url, {
+    useNewUrlParser: true, 
+    useUnifiedTopology: true, 
+    useCreateIndex: true,
+    useFindAndModify: false
 })
+    .then(console.log('mongodb connected'))
+    .catch(err => console.log(err))
+
+
+// const db = mongoose.connection
+
+
+// db.once('open', () => {
+//     console.log('db open')
+//     const changeStream = db.collection('conversations').watch()
+
+//     changeStream.on('change', (change) => {
+//         if (change.operationType === "insert") {
+//             pusher.trigger('channels', 'newchannel', {
+//                 'change' : change
+//             })
+//         }
+//         else if (change.operationType === "update") {
+//             pusher.trigger('conversation', 'newmessage', {
+//                 'change' : change
+//             })
+//         }
+
+//         else {
+//             console.log('error triggering pusher')
+//         }
+        
+//     })
+
+
+// })
 
     
 //api routes
@@ -87,10 +103,10 @@ app.get('/', (req,res) => {
 })
 
 
-app.post('/new/channel', (req, res) => {
+app.post('/new/channel', async (req, res) => {
     console.log(req.body)
-    const dbData = req.body
-    messages.create( dbData )
+    const dbData = req.body.channelName
+    await messages.create({channelName: dbData, user: req.body.user.id,})
         .then((err,data) =>{
             if(err){
                 res.status(500).send(err)
@@ -102,12 +118,15 @@ app.post('/new/channel', (req, res) => {
 })
 
 
-app.get('/new/channelList', (req,res) => {
-    messages.find((err,data) => {
+app.get('/new/channelList/:id', (req,res) => {
+    // console.log(req.body)
+    messages.find({user:req.params.id},
+        (err,data) => {
         if (err) {
             res.status(500).send(err)
         }
         else{
+            console.log(data)
             let channels = []
             data.map((channelData) => {
                 const channelInfo = {
@@ -122,7 +141,7 @@ app.get('/new/channelList', (req,res) => {
 })
 
 
-app.post('/new/message', (req,res) => {
+app.put('/new/message', (req,res) => {
     console.log(req.body)
     const newMessage = req.body
     messages.findOneAndUpdate(
@@ -130,6 +149,7 @@ app.post('/new/message', (req,res) => {
         { $push: { conversation: newMessage} },
         {upsert: true},
         (err,data) => {
+            
             if (err) {
                 console.log(err)
                 res.status(500).send(err)
@@ -170,33 +190,42 @@ app.get('/new/messageList', (req,res) => {
 })
 
 
-app.post('/register', (req,res) => {
+app.post('/register', async(req,res) => {
     const {name, email, password, password2} = req.body
 
-    const errors = []
+    
+    // const errors = []
+    const errors = new error()
+
+
     
 
     if(!name || !email || !password || !password2){
-        JSON.stringify( errors.push({msg: 'please fill in all fields'}))
+        JSON.stringify( errors.enqueue({msg: 'please fill in all fields'}))
     }
     if(password.length <6){
-        JSON.stringify(errors.push({msg: 'please ensure password is greater than 6 characters'}))
+        JSON.stringify(errors.enqueue({msg: 'please ensure password is greater than 6 characters'}))
     }
     if(password !== password2){
-    JSON.stringify(errors.push({msg: 'passwords do not match'}))
+    JSON.stringify(errors.enqueue({msg: 'passwords do not match'}))
     }
   
     if(errors.length > 0){
     // res.render('index', { errors })
+    var displayError = Object.assign({}, errors)
     res.status(400).json(errors)
+    // console.log(displayError)
     }
     else{
         User.findOne({email: email})
         .then(user => {	
           if(user) {
-            errors.push({msg: 'Email is already registered'})
+            errors.enqueue({msg: 'Email is already registered'})
             // res.render('index', {errors	})
+            // var displayError = Object.assign({}, ...errors)
             res.status(400).json(errors)
+            console.log(errors)
+
         
           }
           else{
@@ -213,6 +242,7 @@ app.post('/register', (req,res) => {
                 .then(user =>{
                 //   res.redirect('/users/login')
                     res.status(201).json(user)
+                    console.log(user)
                 })
                 .catch(err => console.log(err))
   
@@ -228,18 +258,23 @@ app.post('/register', (req,res) => {
 })
 
 
-app.post("/login", (req, res, next) => {
-    passport.authenticate('local', function(err, user, info) {
-        // your logic to how you serve your user
-        if(err){ return next(err); }
+app.post("/login", async(req, res) => {
+    
+    const {email, password} = req.body
 
-        if(user){
-        var logged = user;
-        return res.json({logged: logged});
-        } else {
-        return res.status(401).json(info);
-        }
-      })(req, res, next);
+    const user = await User.findOne({ email })
+
+    if (user && (await bcrypt.compare(password, user.password))) {
+        res.json({
+            id: user.id,
+            name: user.name,
+            email: user.email
+        })
+        console.log(user)
+    }
+    else{
+        res.status(400).json("Invalid User")
+    }
 })
 
   // // const email = req.body.email

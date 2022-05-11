@@ -14,6 +14,18 @@ const UserSchema = new Schema({
     type: String,
     required: true
   },
+  followers: {
+    type: Array,
+    default: [],
+  },
+  followings: {
+    type: Array,
+    default: [],
+  },
+  isAdmin: {
+    type: Boolean,
+    default: false,
+  },
   date: {
     type: Date,
     default: Date.now

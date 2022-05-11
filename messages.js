@@ -2,13 +2,21 @@ const mongoose = require('mongoose')
 
 
 const messageschema = new mongoose.Schema({
-    channelName: String,
+    channelName: {
+        type: String,
+        required: true
+    },
     conversation: [
         {
             message: String,
             timestamp: String
         }
-    ]
+    ],
+    user: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: true,
+        ref: 'users'
+    }
 })
 
 
