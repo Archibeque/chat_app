@@ -23,8 +23,8 @@ const UserSchema = new Schema({
     default: [],
   },
   isAdmin: {
-    type: Boolean,
-    default: false,
+    type: Array,
+    default: [],
   },
   date: {
     type: Date,

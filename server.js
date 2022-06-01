@@ -1,15 +1,23 @@
 const express = require('express')
 const mongoose = require('mongoose')
 const cors = require('cors')
-const messages = require('./messages')
+const messages = require('./channelMessages')
+const sm = require("./singleMessages")
 const User = require('./users')
+const jwt = require("jsonwebtoken")
 const bcrypt = require("bcryptjs");
+const http = require("http")
+// const { Server } = require("socket.io")
 const passport = require("passport")
 var sess = require('express-session')
 const usersRouter = require('./routes/users');
 const Pusher = require("pusher");
 
+
+
 // const { mongoUri } = require('config/keys')
+
+var JWT_SECRET = 'abc123'
 
 class error {
     constructor() {
@@ -28,6 +36,7 @@ class error {
 
 // app config
 const app = express()
+let server = http.createServer(app)
 const port = process.env.port || 5000
 
 
@@ -35,15 +44,15 @@ const port = process.env.port || 5000
 app.use(express.json())
 app.use(cors())
 app.use(express.urlencoded({ extended: false }))
-app.use(sess({
-    secret: 'keyboard cat',
-    resave: false,
-    saveUninitialized: true,
-  }))
+// app.use(sess({
+//     secret: 'keyboard cat',
+//     resave: false,
+//     saveUninitialized: true,
+//   }))
   
-app.use(passport.initialize())
-app.use(passport.session())
-require("./config/passport")(passport)
+// app.use(passport.initialize())
+// app.use(passport.session())
+// require("./config/passport")(passport)
 
 // const pusher = new Pusher({
 //     appId: "1206828",
@@ -98,26 +107,58 @@ mongoose.connect(connection_url, {
 
     
 //api routes
-app.get('/', (req,res) => {
-    res.send('hello nigga')
-})
+// app.get('/:id', (req,res) => {
+//     try{
+//         User.findOne({_id:req.params.id})
+//         .then(data => {
+//             res.status(200).json(data)
+//         })
+//         .catch(err => console.log(err))
+//     }
+//     catch{err => console.log(err)}
+// })
 
 
+
+// Group Chat
 app.post('/new/channel', async (req, res) => {
     console.log(req.body)
     const dbData = req.body.channelName
-    await messages.create({channelName: dbData, user: req.body.user.id,})
+    await messages.create({channelName: dbData, user: req.body.user.id,}),
+        User.findOneAndUpdate(
+        { _id:  req.body.user.id },
+        { $push: { isAdmin: req.body.channelName} },
+        {upsert: true})
+        
         .then((err,data) =>{
             if(err){
                 res.status(500).send(err)
             }else{
                 console.log(data)
+               
             }
         })
         .catch(err => console.log(err))
+
+    // await User.findOneAndUpdate(
+    //     { _id:  req.body.user.id },
+    //     { $push: { isAdmin: data.channelName} },
+    //     {upsert: true},
+    //     (err,data) => {
+    //         if (err) {
+    //             console.log(err)
+    //             res.status(500).send(err)
+    //         }
+    //         else{
+    //             console.log(data)
+    //             res.status(200).send(data)
+    //         }
+    //     })
+        
+
 })
 
-
+// get group channels a particular user belongs to
 app.get('/new/channelList/:id', (req,res) => {
     // console.log(req.body)
     messages.find({user:req.params.id},
@@ -190,6 +231,164 @@ app.get('/new/messageList', (req,res) => {
 })
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// add to followers for inviting people by search functionality ---username---.
+
+app.post("/addContacts/:id", async(req, res) => {
+    // console.log(req.params)
+    // console.log(req.body)
+
+    try{
+        //Search for a friend in db. (Data from req)
+        const newFriend = [];
+        const findFriendInDb = await User.find({ name: req.body.contactName})
+        .then((findFriendInDb) => 
+            findFriendInDb.map((f) => {
+                const friendDetails = {
+                    id: f._id
+                }
+                newFriend.push(friendDetails)
+
+            })
+            // ,res.status(200).json(data)
+        )
+        .catch((err) => console.log(err))
+
+        // returning d var search friend doesn't hold data so i used an
+        // array newFriend to hold just the searchFriend id. (By mapping)
+        
+        console.log(newFriend[0].id)
+        
+        //
+        if(newFriend[0].id !== req.params.id){
+            const AddNewFriend = []
+            await User.find({_id: req.params.id})
+            .then((data) =>
+                data.map((u) => {
+                    const userDetails = {
+                        id: u._id,
+                        followers: u.followers
+                    }
+                    AddNewFriend.push(userDetails)
+                }),
+                
+                // ,res.status(200).json(findUserFollowerModel)
+            )
+
+            .catch((err) => console.log(err))
+            
+            console.log(AddNewFriend[0].followers)
+
+
+            //
+            if (AddNewFriend[0].followers.includes(newFriend[0].id)){
+                res.status(400).send("This contact already exists on your profile")
+
+            }
+            else{
+                const AddNewFollower = await User.findOneAndUpdate({_id:req.params.id}, {
+                    $push: {followers: newFriend[0].id}
+                })
+                .then((AddNewFollower) =>
+                    res.status(200).json(AddNewFollower))
+                .catch((err) => console.log(err))
+            }
+            // res.status(200).json(newFollower)
+           
+            
+        }
+        else{
+            res.status(400).send("failed to do that kind of stuff")
+        }
+
+    }
+    catch{(err) => console.log(err)}
+    
+})
+
+
+
+// random users for friendlist for now
+app.get("/randomUser", async(req, res) => {
+    // console.log(req.body)
+    try{
+        await User.findOne({name: "fedr"})
+        .then((data) =>
+            res.status(200).json(data))
+            // console.log(data)
+            
+        // )
+        .catch(err => {
+            res.status(400).json(err)
+            console.log(err)
+        })
+    }
+    catch{(err) => console.log(err)}
+})
+
+
+
+
+
+// one to one chat 
+app.post('/new/singlemessage/:userId/:receiverId', async(req, res) => {
+    console.log(req.params)
+    // const newMessage = req.body
+    const singlemessage = new sm({ oneToOneChatUsers:[req.params.userId, req.params.receiverId]})
+    try {
+       var seeam = await singlemessage.save()
+       res.status(200).json(seeam)
+       console.log(seeam)
+    } catch (err) {
+        res.status(500).json(err);
+        console.log(err)
+    }
+   // created 1 to 1 chat system
+})
+
+//message btw 1 to 1 users
+app.post("/singlemessage/:userId", async(req, res) => {
+    const { singlechatId, message, timestamp } = req.body
+    try{
+        const gh = await sm.findById({_id:singlechatId})
+        gh.save({conversation:{message, timestamp}})
+        .then((data) => res.status(200).json(data))
+    }
+    catch{err => console.log(err)    }
+    
+})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// auth
 app.post('/register', async(req,res) => {
     const {name, email, password, password2} = req.body
 
@@ -210,11 +409,11 @@ app.post('/register', async(req,res) => {
     JSON.stringify(errors.enqueue({msg: 'passwords do not match'}))
     }
   
-    if(errors.length > 0){
+    if(errors.count > 0){
     // res.render('index', { errors })
-    var displayError = Object.assign({}, errors)
+    // var displayError = Object.assign({}, errors)
     res.status(400).json(errors)
-    // console.log(displayError)
+    console.log(errors)
     }
     else{
         User.findOne({email: email})
@@ -241,7 +440,11 @@ app.post('/register', async(req,res) => {
                     newUser.save()
                 .then(user =>{
                 //   res.redirect('/users/login')
-                    res.status(201).json(user)
+                    res.status(201).json({
+                        id: user.id,
+                        name: user.name,
+                        email: user.email
+                    })
                     console.log(user)
                 })
                 .catch(err => console.log(err))
@@ -259,7 +462,6 @@ app.post('/register', async(req,res) => {
 
 
 app.post("/login", async(req, res) => {
-    
     const {email, password} = req.body
 
     const user = await User.findOne({ email })
@@ -332,6 +534,75 @@ app.post("/login", async(req, res) => {
   
 
 // app.use('/users', usersRouter);
+
+
+//  socket stuff
+// var io = new Server(server)
+
+
+
+// try{
+//     //Search for a friend in db. (Data from req)
+//     const newFriend = []
+//     const searchfriend = await User.find({ name: req.body.contactName})
+//     .then((data) =>
+//     res.status(200).json(data))
+//     .catch((err) => console.log(err))
+//     // returning d var search friend doesn't hold data so i used an
+//     // array newFriend to hold just the searchFriend id. (By mapping)
+//     searchfriend.map((friendId) => {
+//         const friendDetails = {
+//             id: friendId._id
+//         }
+//         newFriend.push(friendDetails)
+
+//     })
+    
+//     //
+//     if(newFriend[0].id !== req.params.id){
+//         const AddNewFriend = []
+//         const findUserFollowerModel = await User.findOne({_id: req.params.id})
+//         .then()
+//         .catch((err) => console.log(err))
+//         findUserFollowerModel.map((u) => {
+//             const userDetails = {
+//                 id: u._id,
+//                 followers: u.followers
+//             }
+//             AddnewFriend.push(userDetails)
+//         })
+
+//         //
+//         if (AddNewFriend[1].followers.includes(newFriend[0].id)){
+//             res.status(400).send("This contact already exists on your profile")
+
+//         }
+//         else{
+//             const AddNewFollower = await User.findOneAndUpdate({_id:req.params.id}, {
+//                 $push: {followers: newFriend[0].id}
+//             })
+//             .then(
+//                 res.status(200).json(AddNewFollower))
+//             .catch((err) => console.log(err))
+//         }
+//         res.status(200).json(newFollower)
+       
+        
+//     }
+//     else{
+//         res.status(400).send("failed to do that kind of stuff")
+//     // }
+
+// }
+// // catch{(err) => console.log(err)}
+
+// })
+
+
+
+
+
+
 
 
 

@@ -12,6 +12,11 @@ const messageschema = new mongoose.Schema({
             timestamp: String
         }
     ],
+    pool: {
+        type: Array,
+        dwfault:[]
+        
+    },
     user: {
         type: mongoose.Schema.Types.ObjectId,
         required: true,
