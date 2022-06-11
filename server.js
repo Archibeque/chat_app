@@ -185,6 +185,7 @@ app.get('/new/channelList/:id', (req,res) => {
 app.put('/new/message', (req,res) => {
     console.log(req.body)
     const newMessage = req.body
+    if(req.query.id != "null"){
     messages.findOneAndUpdate(
         { _id: req.query.id },
         { $push: { conversation: newMessage} },
@@ -199,6 +200,9 @@ app.put('/new/message', (req,res) => {
                 res.status(200).send(data)
             }
     })
+    }else{
+        res.status(400).json("you have to select a channel or contact")
+    }
 })
 
 
@@ -320,8 +324,38 @@ app.post("/addContacts/:id", async(req, res) => {
 })
 
 
+// contact of a particular user
 
-// random users for friendlist for now
+app.get("/followers/:userId", async(req,res) => {
+    const contact = []
+    try{
+    await User.find({_id:req.params.userId})
+    .then((data) =>
+    data.map((f) =>{ 
+        const contactDetails = {
+            follower: f.followers
+        }
+        contact.push(contactDetails)
+    }))
+    .catch(err => console.log(err))
+    console.log(contact[0].follower)
+    
+
+    if(contact[0].follower !== null){    
+    const contactList = await User.find({_id: {$in: contact[0].follower}})    
+    res.status(200).json(contactList)
+    
+    }
+        
+}catch{ err => console.log(err)}
+    // console.log(data)
+})
+
+
+
+
+
+// random users for invite for now
 app.get("/randomUser", async(req, res) => {
     // console.log(req.body)
     try{
@@ -363,8 +397,8 @@ app.post('/new/singlemessage/:userId/:receiverId', async(req, res) => {
 app.post("/singlemessage/:userId", async(req, res) => {
     const { singlechatId, message, timestamp } = req.body
     try{
-        const gh = await sm.findById({_id:singlechatId})
-        gh.save({conversation:{message, timestamp}})
+        // const gh = new sm({conversation:{message, timestamp}})
+        await sm.findOneAndUpdate({_id: singlechatId}, {$push:{conversation: {message, timestamp}}})
         .then((data) => res.status(200).json(data))
     }
     catch{err => console.log(err)    }

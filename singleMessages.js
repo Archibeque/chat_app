@@ -6,10 +6,12 @@ const singlemessageschema = new mongoose.Schema({
         type: Array,
         default: []
     },
-    conversation: {
+    conversation: [
+        {
         message: String,
         timestamp: String
-    },
+        }
+    ],
 })
 
 
