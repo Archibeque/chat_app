@@ -73,13 +73,14 @@ function Register() {
   };
 
   useEffect(() => {
-    if (isError) {
-      toast.error(message);
+    // if (isError) {
+    //   // toast.error(message);
+    //   console.log(toast.error(message));
     
-      // <span>
-      //   message
-      // </span>
-    }
+    //   // <span>
+    //   //   message
+    //   // </span>
+    // }
     if (isSuccess) {
       toast.success("User successfully registered")
       history("/login")

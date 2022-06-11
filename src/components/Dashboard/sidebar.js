@@ -23,6 +23,8 @@ import axios from '../axios'
 import { setChannelInfo } from '../../features/counter/appSlice';
 import { useDispatch, useSelector } from 'react-redux'
 import { Avatar, Fab } from '@material-ui/core';
+import FriendList from './FriendList';
+import InviteFriend from './InviteFriend';
 
 
 // import Pusher from 'pusher-js'
@@ -126,6 +128,10 @@ export default function Sidebar() {
     // )
 
   },[])
+  ////////////////////////////////////////////////
+  /////////////////////////////////////////////////
+
+  
 
 
 
@@ -189,7 +195,7 @@ export default function Sidebar() {
         </List>
         <Divider />
         <List className={classes.shift}>
-          {['Friends', 'Invite'].map((text, index) => (
+          {[<FriendList />, <InviteFriend />].map((text, index) => (
             <ListItem button key={text}>
               <ListItemIcon>{index % 2 === 0 ? <ContactMailIcon color="primary" /> : <EmojiPeopleIcon color="primary" />}</ListItemIcon>
               <ListItemText primary={text}  className="sidebar__touppercase" />

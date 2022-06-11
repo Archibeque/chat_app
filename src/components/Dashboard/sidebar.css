@@ -21,6 +21,7 @@
     font-weight: 400;
     text-transform: capitalize;
     color: #fff;
+    margin-left: 10px;
 }
 
 /* #sidebar__scapy:-webkit-scrollbar {

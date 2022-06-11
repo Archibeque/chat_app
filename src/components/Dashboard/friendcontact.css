@@ -1,0 +1,22 @@
+.container{
+    height: 100%
+}
+.friend{
+    display:flex;
+    justify-content: space-evenly;
+    color: rgb(124, 118, 184);
+    border-radius: 24px;
+    cursor: pointer;
+    z-index: 10;
+}
+.friend:hover{
+    background-color: #3f51b5;
+    color: #fff;
+}
+.name{
+    padding: 10px;
+}
+
+.datejoined{
+    padding: 10px;
+}

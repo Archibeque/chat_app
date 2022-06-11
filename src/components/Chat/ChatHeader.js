@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import './ChatHeader.css'
 import EditLocationRoundedIcon from '@material-ui/icons/EditLocationRounded'
 import NotificationsIcon from '@material-ui/icons/Notifications'
@@ -6,11 +6,19 @@ import PeopleAltRoundedIcon from '@material-ui/icons/PeopleAltRounded'
 import SendRoundedIcon from '@material-ui/icons/SendRounded'
 import SearchRoundedIcon from '@material-ui/icons/SearchRounded'
 import HelpRoundedIcon from '@material-ui/icons/HelpRounded'
+import { Tooltip } from '@material-ui/core'
+import { useSelector } from 'react-redux'
+import { useReducer } from 'react'
+import { useEffect } from 'react'
 
 
 
 
-function Header({ channelName }) {
+function Header() {
+  const { channelName, contactName } = useSelector((state) => state.app)
+
+
+
   return (
     <div className="chatHeader">
       <div className="chatHeader__left">
@@ -18,7 +26,7 @@ function Header({ channelName }) {
         <span className="chatHeader__Hash">
           #
         </span>
-        { channelName }
+        {  } 
       </h3>
       </div>
       
@@ -26,7 +34,9 @@ function Header({ channelName }) {
       <div className="chatHeader__right">
         <NotificationsIcon color="primary" />
         <EditLocationRoundedIcon color="primary" />
-        <PeopleAltRoundedIcon color="primary" />
+        <Tooltip title="Add Participants!">
+          <PeopleAltRoundedIcon color="primary" />
+        </Tooltip>
 
 
         <div className="chatHeader__search">

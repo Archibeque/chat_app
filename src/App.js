@@ -1,7 +1,7 @@
 import React from 'react'
 import Dashboard from './components/Dashboard/Dashboard';
 import Register from './components/Frontend/Register';
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import { BrowserRouter as Router, Route, Routes, Redirect } from "react-router-dom";
 import Login from './components/Frontend/Login';
 import { useSelector } from "react-redux";
 import { ToastContainer } from 'react-toastify';
@@ -16,6 +16,14 @@ function App() {
   // console.log(user)
 
 
+
+  // return (
+  //   <>
+  //     <div className="inside">hello
+  //       <div className="children">from here</div>
+  //     </div>
+  //   </>
+  // )
   
 
   return (

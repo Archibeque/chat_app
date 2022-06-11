@@ -12,12 +12,19 @@ export const appSlice = createSlice({
       state.channelId = action.payload.channelId;
       state.channelName = action.payload.channelName;
     },
+    setContactInfo: (state, action) => {
+      state.contactId = action.payload.contactId;
+      state.contactName = action.payload.contactName;
+    },
+    
   },
 });
 
-export const { setChannelInfo } = appSlice.actions;
+export const { setChannelInfo, setContactInfo } = appSlice.actions;
 
 export const selectChannelId = (state) => state.app.channelId;
 export const selectChannelName = (state) => state.app.channelName;
+export const selectContactId = (state) => state.app.contactId;
+export const selectContactName = (state) => state.app.contactName;
 
 export default appSlice.reducer;

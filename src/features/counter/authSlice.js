@@ -26,6 +26,7 @@ export const register = createAsyncThunk('auth/register', async (newUser, { reje
         console.log(message)
 
         
+        
 
         return rejectWithValue(toast.error(message))
     }

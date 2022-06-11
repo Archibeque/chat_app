@@ -4,17 +4,21 @@ import AddCircleIcon from '@material-ui/icons/AddCircle'
 import CardGiftcardIcon from '@material-ui/icons/CardGiftcard'
 // import EmojiEmotionsIcon from '@material-ui/icons/EmojiEmotions'
 import GifIcon from '@material-ui/icons/Gif'
+import EmojiSymbolsIcon from '@material-ui/icons/EmojiSymbols'
+
 import './Chat.css'
 import Message from '../main/Message'
 import axios from '../axios'
 import { useSelector } from 'react-redux'
 // import { selectUser } from '../../features/counter/userSlice'
-import { selectChannelId, selectChannelName } from '../../features/counter/appSlice'
+import { selectChannelId, selectChannelName, selectContactId, selectContactName } from '../../features/counter/appSlice'
 import { IconButton } from '@material-ui/core'
-// import Pusher from 'pusher-js'
+// import { io } from "socket.io-client";
 
 import 'emoji-mart/css/emoji-mart.css'
-// import { Picker } from 'emoji-mart'
+import { Picker } from 'emoji-mart'
+import EmojiEmotions from '@material-ui/icons/EmojiEmotions'
+
 
 
 
@@ -30,22 +34,32 @@ function Chat() {
     // const user = useSelector(selectUser)
     const channelId = useSelector(selectChannelId)
     const channelName = useSelector(selectChannelName)
+    const contactlId = useSelector(selectContactId)
+    const contactName = useSelector(selectContactName)
     const [input, setInput] = useState('')
     const [messages, setMessages] = useState([])
-    // const [emojiMenuVisible, setEmojiMenuVisible] = useRef(false, ()=>{});
+    const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+    
+    
+    
+    
+    
+    const handleEmojiPickerhideShow = () => {
+      setShowEmojiPicker(!showEmojiPicker);
+    };
+   
 
-
-
-    // const handleEmoji = () =>{
-
-    // }
+    const handleEmojiClick = (event, emojiObject) => {
+        let message = input;
+        message += emojiObject.emoji;
+        setInput(message);
+      };
 
 
     const getConversation = (channelId) => {
         if (channelId) {
             axios.get(`/new/messageList?id=${channelId}`) 
                 .then((res) =>{
-                    console.log(res.data)
                     setMessages(res.data[0].conversation)
                 })
                 .catch(err => console.log(err))
@@ -67,6 +81,7 @@ function Chat() {
 
     },[channelId])
 
+    
 
     const sendMessage = (e) => {
         e.preventDefault()
@@ -75,12 +90,19 @@ function Chat() {
             message: input,
             timestamp: Date.now()
         })
+
+        
         setInput('')
     }
+    // let socket = io("ws://localhost:8900")
+    // socket.on('connect', () => {
+    //     console.log("it worked")
+    // })
+    
 
     return (
         <div className="chat">
-            <ChatHeader channelName={channelName} />
+            <ChatHeader />
             <div className="chat__messages">
             {
             messages.map(({timestamp, message, i}) => (
@@ -94,7 +116,7 @@ function Chat() {
                     <AddCircleIcon color="primary" />
                 {/* </IconButton> */}
                 <form>
-                    <input type='text' placeholder={`Message #${channelName} `} value={input} onChange={(e) => setInput(e.target.value)} />
+                    <input type='text' placeholder={`Message #${ channelName || contactName} `} value={input} onChange={(e) => setInput(e.target.value)} />
                     <button className="chat__inputButton" onClick={sendMessage} >
                         Send Message
                     </button>
@@ -108,13 +130,9 @@ function Chat() {
                         <GifIcon fontsize="large" color="primary" />
                     </IconButton>
                     <IconButton>
-                        {/* <EmojiEmotionsIcon fontsize="large" color="primary" onClick={setEmojiMenuVisible} /> */}
-                        {/* <Picker set='apple' /> */}
-                        {/* <Picker onSelect={this.addEmoji} /> */}
-                        {/* <Picker title='Pick your emoji…' emoji='point_up' /> */}
-                        {/* <Picker style={{ position: 'absolute', bottom: '20px', right: '20px' }} /> */}
-                        {/* <Picker i18n={{ search: 'Recherche', categories: { search: 'Résultats de recherche', recent: 'Récents' } }} /> */}
-
+                        <EmojiEmotions onClick={handleEmojiPickerhideShow} color="primary" />
+                        {/* {showEmojiPicker && <Picker className="emojiStyle" onEmojiClick={handleEmojiClick} />} */}
+                            
                     </IconButton>
                 </div>
             </div>
