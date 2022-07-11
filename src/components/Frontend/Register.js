@@ -105,7 +105,7 @@ function Register() {
       <div className="login__left">
         <div className="login__logo">
           {/* <span>{locked.msg}</span> */}
-
+          <h2 className="sign__up">Sign Up</h2>
           <form noValidate onSubmit={handleSubmit} autoComplete="off">
             <TextField
               id="name"

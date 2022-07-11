@@ -40,7 +40,13 @@
     opacity: 0.8;
     z-index: 10;
 }
-
+.sign__up{
+    color:  #351e9b;
+    font-weight: 300;
+    text-decoration: underline;
+    text-align: center;
+    margin-top: 80px;
+}
 
 
 

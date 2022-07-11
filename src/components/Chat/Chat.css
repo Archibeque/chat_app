@@ -3,7 +3,7 @@
     flex-direction: column;
     flex: 0.75;
     background-color: #363a3f;
-    height: 100vh;
+    height: 85vh;
     border-radius: 5px;
 }
 .chat__messages{
@@ -52,11 +52,7 @@
 }
 
 /* .emojiStyle{
-    position: absolute;
-    top: -350px;
-    background-color: #080420;
-    box-shadow: 0 5px 10px #9a86f3;
-    border-color: #9a86f3;
+    
 } */
 
 /* .emoji-scroll-wrapper::-webkit-scrollbar {

@@ -9,6 +9,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import Chat from "../Chat/Chat";
 
 
+
 const drawerWidth = 240;
 
 const useStyles = makeStyles(theme => ({
@@ -39,7 +40,6 @@ const useStyles = makeStyles(theme => ({
 // This is the content component
 function Content() {
   const classes = useStyles();
-
 
   return (
     <React.Fragment>

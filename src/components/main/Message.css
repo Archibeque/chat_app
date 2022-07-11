@@ -3,12 +3,36 @@
     align-items: center;
     padding: 20px;
     color: white;
+    margin-left: 20px;
 }
+
 .message__info{
     margin-left: 20px;
+    
 }
 .message__timestamp{
     color: gray;
     margin-left: 20px;
     font-size: x-small;
 }
+
+.other{
+    display: flex;
+    align-items: center;
+    flex-direction: row-reverse;
+    justify-content: flex-start;
+    padding: 20px;
+    margin-right: 40px;
+    color: white;
+}
+.message__other{
+    margin-right: 20px;
+}
+.message__width{
+    background-color: #3f51b5;
+    padding: 10px;
+    border-radius: 20px;
+    max-width: 300px;
+    text-overflow: clip;
+}
+

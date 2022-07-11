@@ -19,6 +19,7 @@ import Drawer from "@material-ui/core/Drawer";
 import SideBar from "./sidebar";
 // import setAuthToken from "../../utils/setAuthToken";
 import { logout, reset } from "../../features/counter/authSlice";
+import { reset as appReset } from "../../features/counter/appSlice";
 import { useNavigate } from 'react-router-dom'
 import { useDispatch } from "react-redux";
 
@@ -90,6 +91,7 @@ export default function PersistentDrawerLeft() {
 
     dispatch(logout());
     dispatch(reset());
+    dispatch(appReset());
     history("/login")
   }
 

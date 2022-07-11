@@ -188,7 +188,9 @@ export default function Sidebar() {
               <ListItemIcon>{name % 2 === 0 ? <InboxIcon color="primary" /> : <Avatar><GroupIcon color="primary"/></Avatar>}</ListItemIcon>
               <ListItemText primary={name} className="sidebar__touppercase" onClick={() => dispatch(setChannelInfo({
                 channelId: id,
-                channelName: name
+                channelName: name,
+                contactId: null,
+                contactName: null,
               }))} />
             </ListItem>
           ))}
