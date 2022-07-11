@@ -9,7 +9,8 @@ const messageschema = new mongoose.Schema({
     conversation: [
         {
             message: String,
-            timestamp: String
+            timestamp: String,
+            sender: String
         }
     ],
     pool: {

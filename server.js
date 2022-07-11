@@ -107,9 +107,9 @@ mongoose.connect(connection_url, {
 
     
 //api routes
-// app.get('/:id', (req,res) => {
+// app.get('/finduser/:senderId', async(req,res) => {
 //     try{
-//         User.findOne({_id:req.params.id})
+//         await User.find({_id: req.params.senderId})
 //         .then(data => {
 //             res.status(200).json(data)
 //         })
@@ -124,8 +124,8 @@ mongoose.connect(connection_url, {
 app.post('/new/channel', async (req, res) => {
     console.log(req.body)
     const dbData = req.body.channelName
-    await messages.create({channelName: dbData, user: req.body.user.id,}),
-        User.findOneAndUpdate(
+    await messages.create({channelName: dbData, user: req.body.user.id, pool: req.body.user.id}),
+    await User.findOneAndUpdate(
         { _id:  req.body.user.id },
         { $push: { isAdmin: req.body.channelName} },
         {upsert: true})
@@ -139,6 +139,7 @@ app.post('/new/channel', async (req, res) => {
             }
         })
         .catch(err => console.log(err))
+    
 
     // await User.findOneAndUpdate(
     //     { _id:  req.body.user.id },
@@ -161,7 +162,7 @@ app.post('/new/channel', async (req, res) => {
 // get group channels a particular user belongs to
 app.get('/new/channelList/:id', (req,res) => {
     // console.log(req.body)
-    messages.find({user:req.params.id},
+    messages.find({pool:req.params.id},
         (err,data) => {
         if (err) {
             res.status(500).send(err)
@@ -206,16 +207,15 @@ app.put('/new/message', (req,res) => {
 })
 
 
-app.get('/new/messageList', (req,res) => {
-    const id = req.query.id
+app.get('/new/messageList/:channelId', (req,res) => {
+    console.log(req.params)
+    const id = req.params.channelId
+    console.log(id)
 
-    messages.find({_id: id},  (err,data) => {
-        if (err) {
-            res.status(500).send(err)
-        }
-        else{
-            // console.log(conversation.length)
-            // let messages = []
+
+    messages.find({_id: id})
+    .then((data) => {
+            console.log(data)
             // data.map((conversationData)=>{
             //     const recentMessage = {
             //         message: conversationData.message,
@@ -229,10 +229,77 @@ app.get('/new/messageList', (req,res) => {
             //     }
             //     messages.push(recentMessage)
             // })
-            res.status(200).send(data)
-        }
+            // res.status(200).send(data)
+            let m = []
+
+            data.map((d) => {
+                const recentMessage = {
+                    conversationId: d._id,
+                    message: d.conversation,
+                    user: d.user,
+                }
+                m.push(recentMessage)
+            })
+            res.status(200).send(m)
+            console.log(m)
+        
     })
+    .catch(console.log())
 })
+
+// ADD PEOPLE TO A GROUP - TO BE CARRIED OUT BY GROUP ADMIN.
+// THIS MODEL WILL RELY ON CONTACTS.
+app.post("/addGroupContact/:channelId/:userId/:newContactId", async(req, res) => {
+    console.log(req.params.channelId, req.params.newContactId, req.params.userId)
+    try{
+        if(req.params.channelId && req.params.newContactId !== "null"){
+            let barray = []
+            const bry = await messages.find({_id: req.params.channelId, user: req.params.userId})
+            // console.log(bry)
+            .then((bry) =>
+            bry.map((v) => {
+            const detaild = {
+            id: v._id,
+            pool: v.pool
+            }
+            barray.push(detaild)
+            }))
+            .catch(err => console.log(err))
+
+            console.log(barray[0])
+
+
+            // console.log(bry)
+
+            if(barray[0].pool.includes(req.params.newContactId)){
+                res.status(500).send("Channel Participant exists already")
+                
+            }
+            else{
+                const addContact = await messages.findOneAndUpdate({_id: req.params.channelId}, {$push: {pool: req.params.newContactId}})
+                res.status(200).json(addContact);
+            }
+        }   
+        else{
+            res.status(400).send("sorry you need to input the required details to carryout this operation")
+            console.log("sorry statement")
+        }
+
+    }
+    catch (err) {
+        res.status(500).json(err);
+    }
+    // .then((data) => res.status(200).json(data))
+    // .catch((err) => console.log(err))
+    // if(req.params.id !== ""){
+    //     const addParticipant = new messages({_id:channelId})
+    // }
+})
+
+
+
+
+
 
 
 
@@ -251,7 +318,7 @@ app.get('/new/messageList', (req,res) => {
 
 // add to followers for inviting people by search functionality ---username---.
 
-app.post("/addContacts/:id", async(req, res) => {
+app.post("/addContacts/:userId", async(req, res) => {
     // console.log(req.params)
     // console.log(req.body)
 
@@ -274,7 +341,7 @@ app.post("/addContacts/:id", async(req, res) => {
         // returning d var search friend doesn't hold data so i used an
         // array newFriend to hold just the searchFriend id. (By mapping)
         
-        console.log(newFriend[0].id)
+        // console.log(newFriend[0].id)
         
         //
         if(newFriend[0].id !== req.params.id){
@@ -294,7 +361,7 @@ app.post("/addContacts/:id", async(req, res) => {
 
             .catch((err) => console.log(err))
             
-            console.log(AddNewFriend[0].followers)
+            // console.log(AddNewFriend[0].followers)
 
 
             //
@@ -309,6 +376,16 @@ app.post("/addContacts/:id", async(req, res) => {
                 .then((AddNewFollower) =>
                     res.status(200).json(AddNewFollower))
                 .catch((err) => console.log(err))
+
+                (newFriend[0].id.followers.includes(AddNewFriend[0].id)) ?
+                    res.status(400).send("your receiver already knows you") :
+                    await User.findOneAndUpdate({_id: newFriend[0].id}, {
+                        $push: {followers: AddNewFriend[0].id}
+                    })
+                    .then((data) =>
+                    res.status(200).json(data))
+                    .catch((err) => console.log(err))
+                
             }
             // res.status(200).json(newFollower)
            
@@ -338,13 +415,16 @@ app.get("/followers/:userId", async(req,res) => {
         contact.push(contactDetails)
     }))
     .catch(err => console.log(err))
-    console.log(contact[0].follower)
+    // console.log(contact[0].follower)
     
 
-    if(contact[0].follower !== null){    
+    if(contact[0].follower.length !== 0){    
     const contactList = await User.find({_id: {$in: contact[0].follower}})    
     res.status(200).json(contactList)
     
+    }
+    else{
+        res.status(200).json("You do not have any contacts")
     }
         
 }catch{ err => console.log(err)}
@@ -356,22 +436,22 @@ app.get("/followers/:userId", async(req,res) => {
 
 
 // random users for invite for now
-app.get("/randomUser", async(req, res) => {
-    // console.log(req.body)
-    try{
-        await User.findOne({name: "fedr"})
-        .then((data) =>
-            res.status(200).json(data))
-            // console.log(data)
+// app.get("/randomUser", async(req, res) => {
+//     // console.log(req.body)
+//     try{
+//         await User.findOne({name: "fedr"})
+//         .then((data) =>
+//             res.status(200).json(data))
+//             // console.log(data)
             
-        // )
-        .catch(err => {
-            res.status(400).json(err)
-            console.log(err)
-        })
-    }
-    catch{(err) => console.log(err)}
-})
+//         // )
+//         .catch(err => {
+//             res.status(400).json(err)
+//             console.log(err)
+//         })
+//     }
+//     catch{(err) => console.log(err)}
+// })
 
 
 
@@ -381,12 +461,39 @@ app.get("/randomUser", async(req, res) => {
 app.post('/new/singlemessage/:userId/:receiverId', async(req, res) => {
     console.log(req.params)
     // const newMessage = req.body
+    const ids = [req.params.userId, req.params.receiverId]
+    
     const singlemessage = new sm({ oneToOneChatUsers:[req.params.userId, req.params.receiverId]})
     try {
-       var seeam = await singlemessage.save()
-       res.status(200).json(seeam)
-       console.log(seeam)
-    } catch (err) {
+        let foundMessages = []
+        await sm.find({oneToOneChatUsers: {$all: req.params.receiverId}})
+        .then((data) => data.map((r) => {
+            const singleChatUsers = {
+                id: r._id,
+                oneToOne: r.oneToOneChatUsers
+            }
+            foundMessages.push(singleChatUsers)
+        }))
+        .catch(console.log)
+        console.log(foundMessages)
+        console.log(foundMessages[0])
+        
+        if(foundMessages.length == 0){
+            var seeam = await singlemessage.save()
+            res.status(200).json(seeam)
+            console.log(seeam)
+        }
+        else if(foundMessages[0].oneToOne.includes(ids[1])){
+            if(foundMessages[0].oneToOne.includes(ids[0])){
+            res.status(200).json(foundMessages[0])
+        }}
+        else{
+            
+        }
+        
+        }
+        //    
+     catch (err) {
         res.status(500).json(err);
         console.log(err)
     }
@@ -395,14 +502,46 @@ app.post('/new/singlemessage/:userId/:receiverId', async(req, res) => {
 
 //message btw 1 to 1 users
 app.post("/singlemessage/:userId", async(req, res) => {
+    console.log(req.body)
     const { singlechatId, message, timestamp } = req.body
     try{
-        // const gh = new sm({conversation:{message, timestamp}})
-        await sm.findOneAndUpdate({_id: singlechatId}, {$push:{conversation: {message, timestamp}}})
-        .then((data) => res.status(200).json(data))
+        singleChatClient = []
+        await sm.find({_id: singlechatId})
+        .then((data) => 
+        data.map((sc) => {
+            const singlechat = {
+                oneToOneChatUsers: sc.oneToOneChatUsers
+            }
+            singleChatClient.push(singlechat)
+        })
+        // res.status(200).json(data)
+        )
+        
+        console.log(singleChatClient)
+        if(singleChatClient[0].oneToOneChatUsers.includes(req.params.userId)){
+
+            // const gh = new sm({conversation:{message, timestamp}})
+            await sm.findOneAndUpdate({_id: singlechatId}, {$push:{conversation: {message, timestamp}}})
+            .then((data) => res.status(200).json(data))
+            console.log(data)
+        }
+        else{
+            res.status(400).send("Sorry you can't chat someone you don't know")
+        }
     }
     catch{err => console.log(err)    }
     
+})
+
+
+//get messages btw 1 to 1 users
+app.get("/singlemessage/:messageId", async(req,res) => {
+    const { messageId } = req.params
+    try{
+        await sm.find({_id: messageId})
+        .then((data) => res.status(200).json(data))
+    }
+    catch{err => console.log(err)}
 })
 
 
@@ -513,6 +652,9 @@ app.post("/login", async(req, res) => {
     }
 })
 
+
+
+
   // // const email = req.body.email
   // // const password = req.body.password
   //   // const { email, password } = req.body;
@@ -521,7 +663,14 @@ app.post("/login", async(req, res) => {
   
 // });
 
+app.get("/findUsers/:senderId", async(req, res) => {
 
+    const user = await User.findOne({_id: req.params.senderId })
+    .then((user) => res.status(200).json(user))
+    .catch(console.log)
+
+    
+})
 
 // app.post("/register", (req, res) => {
 //     const {name, email, password, password1} = req.body
@@ -631,8 +780,6 @@ app.post("/login", async(req, res) => {
 // // catch{(err) => console.log(err)}
 
 // })
-
-
 
 
 
