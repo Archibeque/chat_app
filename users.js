@@ -14,6 +14,10 @@ const UserSchema = new Schema({
     type: String,
     required: true
   },
+  photo: {
+    data: Buffer,
+    contentType: String
+  },
   followers: {
     type: Array,
     default: [],
@@ -28,7 +32,7 @@ const UserSchema = new Schema({
   },
   date: {
     type: Date,
-    default: Date.now
+    default: Date.now()
   }
 });
 module.exports = User = mongoose.model("users", UserSchema);

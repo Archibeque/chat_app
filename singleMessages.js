@@ -9,9 +9,15 @@ const singlemessageschema = new mongoose.Schema({
     conversation: [
         {
         message: String,
-        timestamp: String
+        timestamp: String,
+        sender: String,
+        senderPicture: String,
         }
     ],
+    receipientPicture: String,
+    receipientName: String,
+    senderPicture: String,
+    senderName: String,
 })
 
 
