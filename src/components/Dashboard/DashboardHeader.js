@@ -1,7 +1,7 @@
 // This file contains the logic for the top navbar and drawer
 //  Coded by Nnadi Daniel. All rights reserved
 
-import React from "react";
+import React, { useRef, useEffect } from "react";
 import clsx from "clsx";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import { Button, Link, SvgIcon, Tooltip } from "@material-ui/core";
@@ -17,14 +17,16 @@ import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import { ClickAwayListener } from '@material-ui/core';
 import Drawer from "@material-ui/core/Drawer";
 import SideBar from "./sidebar";
-// import setAuthToken from "../../utils/setAuthToken";
 import { logout, reset } from "../../features/counter/authSlice";
 import { reset as appReset } from "../../features/counter/appSlice";
 import { useNavigate } from 'react-router-dom'
 import { useDispatch } from "react-redux";
+import DashboardAvatar from "./DashboardAvatar";
+import { io } from "socket.io-client";
 
 
 const drawerWidth = 240;
+
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -77,6 +79,8 @@ export default function PersistentDrawerLeft() {
   const theme = useTheme();
   const dispatch = useDispatch()
   const history = useNavigate()
+  const socket = useRef()
+
 
 
   const handleDrawerOpen = () => {
@@ -88,13 +92,18 @@ export default function PersistentDrawerLeft() {
 
   const handleExit = (e) => {
     e.preventDefault();
-
+    socket.current.emit("logout")
     dispatch(logout());
     dispatch(reset());
     dispatch(appReset());
     history("/login")
+    
   }
 
+  useEffect(() => {
+    socket.current = io("http://localhost:5000")
+
+  },[])
 
   return (
     <div className={classes.root}>
@@ -120,7 +129,7 @@ export default function PersistentDrawerLeft() {
           </ClickAwayListener>
 
           <Link
-            href="https://github.com/nnadidan360"
+            href="https://github.com/nnadidan360/chat_app"
             target="_blank"
             style={{ color: "white" }}
           >
@@ -134,6 +143,7 @@ export default function PersistentDrawerLeft() {
           </Link>
 
           <Typography className={classes.title}>Tap Chat</Typography>
+          <DashboardAvatar  />
           <Button color="inherit" onClick={handleExit}>Logout</Button>
         </Toolbar>
       </AppBar>

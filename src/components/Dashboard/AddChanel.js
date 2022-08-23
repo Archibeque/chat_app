@@ -15,25 +15,11 @@ function AddChanel() {
     const [open, setOpen] = useState(false);
     const [show, setShow] = useState(false);
     const { user } = useSelector((state) => state.auth)
-    const [realchannelId, setRealChannelId] = useState("")
     const cId = useSelector(selectcId);
     const channelId = useSelector(selectChannelId)
 
 
 
-
-    const addContactToChannnel = () => {
-
-        console.log(selectChannelId)
-        console.log(selectcId)
-    
-        axios.post(`/addGroupContact/${channelId}/${user.id}/${cId}`)
-        .then((res) =>{
-            console.log(res.data)
-            toast.success(`Contact Succesfully Added`)
-        })
-        .catch(err => console.log(err))
-    }
 
     const handleClickShow = () => {
         setShow(true);
@@ -50,17 +36,15 @@ function AddChanel() {
     setOpen(false);
     };
 
-    // useEffect(() => {
-    
-    //     if (realchannelId !== null) {
-    //         console.log(realchannelId)
-    //       setChannelId(realchannelId);
-    //     }
-    // }, [realchannelId]);
 
     useEffect(() => {
-        addContactToChannnel()
-    },[cId])
+        axios.post(`/new/addGroupContact/${channelId}/${user.id}/${cId}`)
+            .then((res) =>{
+                console.log(res.data)
+                toast.success(`Contact Succesfully Added`)
+            })
+            .catch(err => console.log(err))
+    },[cId,channelId, user])
     
 
   return (
@@ -84,9 +68,6 @@ function AddChanel() {
         <DialogActions>
         <Button onClick={handleClose} color="secondary">
             Cancel
-        </Button>
-        <Button color="primary">
-            Save
         </Button>
         </DialogActions>
     </Dialog>

@@ -35,4 +35,7 @@
     max-width: 300px;
     text-overflow: clip;
 }
-
+.timeago{
+    color: bisque;
+    font-size: x-small;
+}

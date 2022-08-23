@@ -1,6 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import authService from './authService';
-import { toast } from 'react-toastify';
 
 
 const user = JSON.parse(localStorage.getItem('user'));
@@ -28,7 +27,7 @@ export const register = createAsyncThunk('auth/register', async (newUser, { reje
         
         
 
-        return rejectWithValue(toast.error(message))
+        return rejectWithValue(message)
     }
     
 });

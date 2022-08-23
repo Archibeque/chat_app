@@ -14,6 +14,14 @@ const register = async(newUser) => {
     return response.data
 }
 
+const registerwithCredentials = async(newUser) => {
+    const { name } = newUser
+    const response = await axios.post("/register", newUser)
+    if(response.data){
+        const addToContact = await axios.post("/inviteName")
+    }
+}
+
 
 const login = async(userdetails) => {
     const response = await axios.post('/login', userdetails)

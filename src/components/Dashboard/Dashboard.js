@@ -8,6 +8,7 @@ import CssBaseline from "@material-ui/core/CssBaseline";
 import DashboardHeader from "./DashboardHeader";
 import Content from "./content";
 
+
 // const drawerWidth = 240;
 
 const useStyles = makeStyles(theme => ({
@@ -21,12 +22,14 @@ const useStyles = makeStyles(theme => ({
 
 function Dashboard() {
     const classes = useStyles();
+
+    
   
     return (
       <div className={classes.root}>
         <CssBaseline />
         <DashboardHeader />
-        <Content />
+        <Content/>
       </div>
     );
   }

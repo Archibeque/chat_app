@@ -7,17 +7,16 @@ import "./Chat.css";
 import Message from "../main/Message";
 import axios from "../axios";
 import { useSelector } from "react-redux";
+import Robots from "../Dashboard/robots";
 import {
   selectChannelId,
   selectChannelName,
   selectContactId,
-  selectContactName 
+  selectContactName,
 } from "../../features/counter/appSlice";
 import { IconButton } from "@material-ui/core";
 import { Emoji } from "./Emoji";
 import { io } from "socket.io-client";
-
-
 
 // const pusher = new Pusher('5cfa35d1fb08dbbee50b', {
 //     cluster: 'mt1'
@@ -26,35 +25,17 @@ import { io } from "socket.io-client";
 function Chat() {
   const { user } = useSelector((state) => state.auth);
 
-  // const appstate = useSelector((state) => state.app);
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState([]);
-  const [messageSender, setMessageSender] = useState([]);
   const scrollRef = useRef();
-  const socket = useRef(io("ws://localhost:8900"))
-
-
-
-  // const [channelId, setChannelId] = useState("");
-  // const [channelName, setChannelName] = useState("");
-  // const [contactId, setContactId] = useState("");
-  // const [contactName, setContactName] = useState("");
+  const socket = useRef();
+  const [arrivalMessage, setArrivalMessage] = useState(null);
+  const [arrivalChannelMessage, setArrivalChannelMessage] = useState(null);
   const [contactMessageId, setContactMessageId] = useState(null);
-  const appStateChannelId = useSelector(selectChannelId)
-  const appStateChannelName = useSelector(selectChannelName)
-  const appStateContactId = useSelector(selectContactId)
-  const appStateContactName = useSelector(selectContactName)
-
-  // const channel = useSelector((state) => state.app.channelId)
-  // console.log(channel)
-
-  
-
-  // const handleEmojiClick = (event, emojiObject) => {
-  //   let message = input;
-  //   message += emojiObject.emoji;
-  //   setInput(message);
-  // };
+  const appStateChannelId = useSelector(selectChannelId);
+  const appStateChannelName = useSelector(selectChannelName);
+  const appStateContactId = useSelector(selectContactId);
+  const appStateContactName = useSelector(selectContactName);
 
   const addEmoji = (e) => {
     let sym = e.unified.split("-");
@@ -70,100 +51,105 @@ function Chat() {
         .get(`/new/messageList/${appStateChannelId}`)
         .then((res) => {
           setMessages(res.data[0].message);
-          console.log(res.data)
-          // setMessageSender(res.data[0].user)
-        })
-        .catch((err) => console.log(err));
-      
-    } 
-  }
-
-  const getContactConversation = () => {
-    setMessages([])
-    axios
-      .post(`/new/singlemessage/${user.id}/${appStateContactId}`)
-      .then((res) => {
-        setContactMessageId(res.data.id);
-        console.log(res.data);
-
-      })
-      .catch((err) => console.log(err));
-
-    if (contactMessageId !== "") {
-      axios
-        .get(`/singlemessage/${contactMessageId}`)
-        .then((res) => {
-          setMessages(res.data[0].conversation)
           console.log(res.data);
         })
         .catch((err) => console.log(err));
     }
-  }
-
-  const setupContactMessage = () => {
-    
   };
-  
 
-  // console.log(channelId || contactId)
   useEffect(() => {
-    if(appStateContactId !== null){
-      setupContactMessage();
+    if (appStateContactId !== null) {
+      axios
+        .post(`/new/singlemessage/${user.id}/${appStateContactId}`, {
+          ReceipientName: appStateContactName,
+          SenderName: user.name,
+          senderPicture: user.picture,
+        })
+        .then((res) => {
+          setContactMessageId(res.data.id);
+          console.log(res.data);
+        })
+        .catch((err) => console.log(err));
+
+      if (contactMessageId !== null) {
+        console.log(contactMessageId);
+
+        axios
+          .get(`/singlemessage/${contactMessageId}`)
+          .then((res) => {
+            setMessages(res.data[0].conversation);
+            console.log(res.data);
+          })
+          .catch((err) => console.log(err));
+      }
+    } else {
+      setMessages([]);
     }
-  }, [appStateContactId]);
+  }, [appStateContactId, contactMessageId, user]);
 
-  
-
-  useEffect(() => {
-   
-  }, [appS]);
-  useEffect(() => {
-  //   socket.on('connection', () => {
-  //   console.log("it worked")
-  //   console.log(socket)
-  // })
-    console.log(socket)
-    socket.current.emit("currentUserInfo", user.id)
-    socket.current.on("getUsers", users => { 
-      console.log(users)
-    })
-    console.log("noy")
-
-
-  },[user]);
-
-
-
+  console.log(messages);
 
   useEffect(() => {
-    console.log(appStateChannelId)
+    socket.current = io("http://localhost:5000");
+    socket.current.on("getChannelMessage", (data) => {
+      setArrivalChannelMessage({
+        sender: data.sender,
+        senderPicture: data.senderPicture,
+        message: data.message,
+        timestamp: Date.now(),
+      });
+      console.log(data);
+    });
+    console.log(arrivalChannelMessage);
 
-    // if (appStateChannelId !== null) {
-    //   setChannelId(appStateChannelId);
-    // }
-    // else if (appStateContactId !== null) {
-    //   setContactId(appStateContactId);
-    // }
+    socket.current.on("getUserMessage", (data) => {
+      setArrivalMessage({
+        sender: data.sender,
+        senderPicture: data.senderPicture,
+        message: data.message,
+        timestamp: Date.now(),
+      });
+      console.log(data);
+    });
+    console.log(arrivalMessage);
+  }, []);
+
+  console.log(arrivalMessage);
+
+  useEffect(() => {
+    if (appStateChannelId) {
+      arrivalChannelMessage &&
+        setMessages((prev) => [...prev, arrivalChannelMessage]);
+    } else if (appStateContactId) {
+      arrivalMessage && setMessages((prev) => [...prev, arrivalMessage]);
+    }
+  }, [
+    arrivalMessage,
+    arrivalChannelMessage,
+    appStateChannelId,
+    appStateContactId,
+  ]);
+
+  useEffect(() => {
+    socket.current.emit("currentUserInfo", user.id);
+    socket.current.emit("currentChannelInfo", appStateChannelId);
+    socket.current.on("getUsers", (users) => {
+      console.log(users);
+    });
+    socket.current.on("getChannel", (channel) => {
+      console.log(channel);
+    });
+  }, [user, appStateChannelId]);
+
+  useEffect(() => {
+    console.log(appStateChannelId);
 
     if (appStateChannelId) {
       getChannelConversation();
-    } else if (appStateContactId) {
-      getContactConversation();
+    } else {
+      setMessages([]);
     }
-    else{
-      setMessages([])
-    }
-
-    // const channel = pusher.subscribe('conversation');
-    // channel.bind('newmessage', function(data) {
-    //     getConversation(channelId)
-    // });
-
-    // return (
-    //     pusher.unsubscribe
-    // )
-  }, [appStateChannelId, appStateContactId]);
-  // console.log(channelId, contactId)
+  }, [appStateChannelId]);
 
   const sendMessage = (e) => {
     e.preventDefault();
@@ -172,45 +158,76 @@ function Chat() {
       axios.put(`/new/message?id=${appStateChannelId}`, {
         message: input,
         timestamp: Date.now(),
-        sender: user.id
+        sender: user.id,
+        senderPicture: String(user.photo),
+      });
+
+      socket.current.emit("sendChannelMessage", {
+        sender: user.id,
+        senderPicture: String(user.photo),
+        message: input,
+        appStateChannelId,
       });
     } else if (appStateContactId !== null) {
       axios
-      .post(`/singlemessage/${user.id}`, {
-        singlechatId: contactMessageId,
+        .post(`/singlemessage/${user.id}`, {
+          singlechatId: contactMessageId,
+          message: input,
+          timestamp: Date.now(),
+          sender: user.id,
+          senderPicture: String(user.photo),
+        })
+        .then(console.log)
+        .catch(console.log);
+
+      console.log(appStateContactId);
+
+      socket.current.emit("sendMessage", {
         message: input,
-        timestamp: Date.now(),
-        sender: user.id
-      })
-      .then(console.log)
+        sender: user.id,
+        senderPicture: String(user.photo),
+        receiverId: appStateContactId,
+      });
     }
 
     setInput("");
   };
-  
-  console.log(appStateChannelId, appStateContactId);
-  console.log(contactMessageId)
 
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  
+  // if(appStateChannelId && appStateContactId === null){
+  //   return <Robots />
+  // }
+
   return (
     <div className="chat">
       <ChatHeader />
-      <div className="chat__messages">
-        {messages.map(({ timestamp, message, _id, sender }) => (
-          <div ref={scrollRef}>
-            <Message key={_id} timestamp={timestamp} message={message} messageid={_id} messageSender={sender} />
-          </div>
-        ))}
-      </div>
+      {appStateChannelId === null && appStateContactId === null ? (
+        <Robots />
+      ) : (
+        <div className="chat__messages">
+          {messages.map(
+            ({ timestamp, message, _id, sender, senderPicture }) => (
+              <div ref={scrollRef}>
+                <Message
+                  key={_id}
+                  timestamp={timestamp}
+                  message={message}
+                  messageid={_id}
+                  messageSender={sender}
+                  senderPics={senderPicture}
+                />
+              </div>
+            )
+          )}
+        </div>
+      )}
 
       <div className="chat__input">
-        {/* <IconButton> */}
         <AddCircleIcon color="primary" />
-        {/* </IconButton> */}
+
         <form>
           <input
             type="text"
@@ -233,7 +250,6 @@ function Chat() {
             <GifIcon fontsize="large" color="primary" />
           </IconButton>
           <Emoji addEmoji={addEmoji} />
-          
         </div>
       </div>
     </div>
@@ -241,14 +257,3 @@ function Chat() {
 }
 
 export default Chat;
-
-
-
-
-
-
-
-
-// problem
-// wheneva i refresh for contact msg to be fetched,
-// there is no id in contactmessageid which causes a problem

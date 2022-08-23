@@ -1,13 +1,12 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { createSlice } from "@reduxjs/toolkit";
 
-export const appSlice = createSlice({
-  name: "app",
+export const contactAppSlice = createSlice({
+  name: "contactApp",
   initialState: {
-    channelId: null,
-    channelName: null,
-    channelAdmin: null,
-    contactId: null,
-    contactName: null,
+    contactChatId: null,
+    contactcreatorId: null,
+    contactReceiverId: null,
+    conReceiverName: null,
   },
   // The `reducers` field lets us define reducers and generate associated actions
   reducers: {
@@ -32,12 +31,9 @@ export const appSlice = createSlice({
 
 });
 
-export const { setChannelInfo, reset } = appSlice.actions;
+export const { setChannelInfo, reset } = contactAppSlice.actions;
 
-export const selectChannelAdmin = (state) => state.app.channelAdmin;
 export const selectChannelId = (state) => state.app.channelId;
-export const selectChannelName = (state) => state.app.channelName;
 export const selectContactId = (state) => state.app.contactId;
-export const selectContactName = (state) => state.app.contactName;
 
-export default appSlice.reducer;
+export default contactAppSlice.reducer;

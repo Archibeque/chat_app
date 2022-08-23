@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { makeStyles, createStyles } from '@material-ui/core/styles';
 import './sidebar.css'
 import List from '@material-ui/core/List';
@@ -15,17 +15,19 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import EmojiPeopleIcon from '@material-ui/icons/EmojiPeople';
-import InboxIcon from '@material-ui/icons/MoveToInbox';
 import ContactMailIcon from '@material-ui/icons/ContactMail';
-import GroupIcon from '@material-ui/icons/Group';
 import AddIcon from '@material-ui/icons/Add';
 import axios from '../axios'
-import { setChannelInfo } from '../../features/counter/appSlice';
-import { useDispatch, useSelector } from 'react-redux'
-import { Avatar, Fab } from '@material-ui/core';
+import { useSelector } from 'react-redux'
+import { Fab } from '@material-ui/core';
 import FriendList from './FriendList';
 import InviteFriend from './InviteFriend';
-
+import SidebarChatToggler from './SidebarChatToggler';
+import { io } from "socket.io-client";
+import {
+  selectChannelId,
+  selectContactId,
+} from "../../features/counter/appSlice";
 
 // import Pusher from 'pusher-js'
 
@@ -35,7 +37,7 @@ import InviteFriend from './InviteFriend';
 //   cluster: 'mt1'
 // });
 
-const useStyles = makeStyles(() =>
+const Styles = makeStyles(() =>
   createStyles({
     scapy: {
       color: "#fff",
@@ -47,6 +49,13 @@ const useStyles = makeStyles(() =>
       position: "relative",
       top: "30%",
     },
+    unshift: {
+      marginTop: "20px",
+      marginBottom: "30px",
+      textAlign: "center",
+      borderBottom: "2px solid #26282c",
+      
+    },
   }),
 );
 
@@ -55,49 +64,34 @@ const useStyles = makeStyles(() =>
 
 
 export default function Sidebar() {
-  const classes = useStyles();
+  const classes = Styles();
+  const socket = useRef()
   const [open, setOpen] = useState(false);
   const [channels, setChannels] = useState([]);
+  const [friends, setFriends] = useState([]);
+  const [createdChannel, setCreatedChannel] = useState([]);
+  const [createdFriend, setCreatedFriend] = useState([]);
+  const appStateChannelId = useSelector(selectChannelId)
+  const appStateContactId = useSelector(selectContactId)
+
+  
+
   const [input, setInput] = useState("")
   
-  const dispatch = useDispatch()
   
   const { user } = useSelector((state) => state.auth)
 
   const handleClickOpen = () => {
     setOpen(true);
 
-    // const set = (e) => {
-    //   this.setState({textValue: e.target.value});
-    // }
-    // if(setChannelCreate){
-    //   axios.post('/new/channel')
-    // }
+    
   };
 
   const handleClose = () => {
     setOpen(false);
   };
 
-  const handleCreate = () => {
-    if (input !== undefined){
-      axios.post(`/new/channel/`,{
-        user: user,
-        channelName: input
-      })
-        .then(() => {
-          prompt("channel created successfully")
-        })
-        .catch(err => console.log(err) )
-        setOpen(false)
-    }
-    else{
-        setOpen(false)
-        alert("Something went wrong")
-    }
-
-  }
-
+  
 
 
   const getChannels = () => {
@@ -111,36 +105,125 @@ export default function Sidebar() {
       .catch(err => console.log(err))
   }
 
+  
 
-  useEffect(() => {
+  const getFriends = () => {
+    axios.get(`/new/singleMessageList/${user.id}`
+    )
+      .then((res) => {
+        console.log(res.data)
+        setFriends(res.data)
+        console.log(friends)
+      })
+      .catch(err => console.log(err))
+  }
+
+  
+
+
+  useEffect(() => {     
     getChannels()
-    
-
-    // const channel = pusher.subscribe('channels');
-    // channel.bind('newchannel', function(data) {
-    //   getChannels()
-    // });
-
-
-    // return (
-    //     pusher.unsubscribe
-      
-    // )
+    getFriends()
 
   },[])
-  ////////////////////////////////////////////////
-  /////////////////////////////////////////////////
+
+
+    useEffect(() => {
+      socket.current = io("http://localhost:5000")
+      socket.current.on("getCreatedChannel", (data) => {
+        setCreatedChannel({
+          admin: data.creator,
+          name: data.channelName
+        });
+        console.log(data)
+      })
+      console.log(createdChannel)
+
+      socket.current.on("getCreatedFriend", (data) => {
+        setCreatedFriend({
+          bin: data.sender,
+          name: data.contactId,
+          receiverName: data.contactName,
+          receiverPicture: data.contactPhoto,
+          senderPicture: data.senderPicture,
+          senderName: data.senderName
+        });
+        console.log(data)
+      })
+    }, [])
+
+    // useEffect(() => {
+    //   socket.current.emit("currentUserInfo", user.id)
+    //   // socket.current.emit("currentChannelInfo", appStateChannelId)
+    //   socket.current.on("getUsers", users => { 
+    //     console.log(users)
+    //   })
+    //   // socket.current.on("getChannel", channel => { 
+    //   //   console.log(channel)
+    //   // })
+      
+  
+  
+    // },[user, appStateChannelId]);
+
+  console.log(createdChannel)
 
   
 
 
 
+  useEffect(() => {
+    if(createdChannel){
+      createdChannel &&
+      setChannels((prev) => [...prev, createdChannel]);
+    }
+    else if(createdFriend){
+      createdFriend &&
+      setFriends((prev) => [...prev, createdFriend]);
+      
+    }
+
+  },[createdChannel, createdFriend])
+
+  console.log(createdChannel)
+
+  console.log(channels, friends)
+
+
+  ////////////////////////////////////////////////
+  /////////////////////////////////////////////////
+
+  const handleCreate = () => {
+    if (input !== undefined){
+      axios.post(`/new/channel/`,{
+        user: user,
+        channelName: input
+      })
+        .then((res) => {
+          setChannels(res.data)
+        })
+        .catch(err => console.log(err) )
+        setOpen(false)
+
+        socket.current.emit("createChannel", {
+          creator: user.id,
+          channelName: input
+        })
+    }
+    else{
+        setOpen(false)
+        alert("Something went wrong")
+    }
+
+  }
+
+  
+
 
   return (
     <div>
       <div className="sidebar__top">
-        <h3 className="sidebar__touppercase">channel list</h3>
-        {/* <ExpandMoreIcon /> */}
+        <h3 className="sidebar__touppercase">chat list</h3>
       </div>
       
       <div className="sidebar__header">
@@ -181,21 +264,9 @@ export default function Sidebar() {
         </DialogActions>
       </Dialog>
 
-        <List className={classes.scapy} id="sidebar__scapy">
-          {
-          channels.map(({id, name}) => (
-            <ListItem button key={id}>
-              <ListItemIcon>{name % 2 === 0 ? <InboxIcon color="primary" /> : <Avatar><GroupIcon color="primary"/></Avatar>}</ListItemIcon>
-              <ListItemText primary={name} className="sidebar__touppercase" onClick={() => dispatch(setChannelInfo({
-                channelId: id,
-                channelName: name,
-                contactId: null,
-                contactName: null,
-              }))} />
-            </ListItem>
-          ))}
-        </List>
+        <SidebarChatToggler Styles={Styles}  channels={channels} Friends={friends} />
         <Divider />
+        
         <List className={classes.shift}>
           {[<FriendList />, <InviteFriend />].map((text, index) => (
             <ListItem button key={text}>

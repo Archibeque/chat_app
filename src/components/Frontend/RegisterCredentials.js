@@ -45,6 +45,7 @@ function Register() {
       email: email,
       password: password,
       password2: password2,
+    //   senderId: senderId
     };
 
     dispatch(register(newUser));
@@ -159,7 +160,7 @@ function Register() {
           <div style={{ zIndex: 1000 }}>
             {/* {locked ? locked.map((lock)=><h1>lock.msg</h1>): "not available" } */}
           </div>
-        Already have an account
+
           <Button
             variant="outlined"
             color="primary"

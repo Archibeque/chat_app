@@ -1,9 +1,12 @@
 .container{
-    height: 100%
+    height: 100%;
+        
 }
 .friend{
     display:flex;
-    justify-content: space-evenly;
+    justify-content: space-between;
+    align-items: flex-start;
+    width: 30vw;
     color: rgb(124, 118, 184);
     border-radius: 24px;
     cursor: pointer;
@@ -13,10 +16,28 @@
     background-color: #3f51b5;
     color: #fff;
 }
+.wrapper{
+    /* display: flex; */
+    /* justify-content: space-evenly; */
+}
+.photo{
+    
+    /* display: flex;
+    justify-content: flex-start; */
+
+}
 .name{
-    padding: 10px;
+    /* display: flex;
+    justify-content: center;
+     */
 }
 
 .datejoined{
     padding: 10px;
+}
+
+@media only screen and (max-width: 767px) {
+.friend{
+    width: auto;
+}
 }

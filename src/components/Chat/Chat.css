@@ -3,7 +3,7 @@
     flex-direction: column;
     flex: 0.75;
     background-color: #363a3f;
-    height: 85vh;
+    height: 89vh;
     border-radius: 5px;
 }
 .chat__messages{
@@ -49,6 +49,17 @@
 }
 .chat__input > .MuiSvgIcon-root{
     cursor: pointer;
+}
+
+
+
+@media only screen and (max-width: 767px) {
+    .chat >  img {
+        height: 50vh;
+        justify-content: center;
+        align-items: center;
+    
+    }
 }
 
 /* .emojiStyle{

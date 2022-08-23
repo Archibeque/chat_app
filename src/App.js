@@ -12,6 +12,9 @@ import 'react-toastify/dist/ReactToastify.css';
 function App() {
 
   const { user } = useSelector((state) => state.auth)
+
+
+  
   
   // console.log(user)
 
@@ -47,7 +50,7 @@ function App() {
       </Router>
       <ToastContainer />
     </>
-  );
+   );
 }
 
 export default App;
