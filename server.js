@@ -20,8 +20,8 @@ const morgan = require("morgan");
 
 
 
-// const { mongoUri } = require('config/keys')
-// dotenv.config();
+
+dotenv.config();
 
 var JWT_SECRET = 'abc123'
 
@@ -87,14 +87,14 @@ app.use('', require('./routes/Friend'))
 // const connection_url = 'mongodb+srv://dblord:ready007@cluster0.xr77h.mongodb.net/chatbackenddb?retryWrites=true&w=majority'
 // const connection_url = 'mongodb://localhost:27017/emmanuel'
 
-// mongoose.connect(connection_url, {
-//     useNewUrlParser: true, 
-//     useUnifiedTopology: true, 
-//     useCreateIndex: true,
-//     useFindAndModify: false
-// })
-//     .then(console.log('mongodb connected'))
-//     .catch(err => console.log(err))
+mongoose.connect(process.env.MONGO_URI, {
+    useNewUrlParser: true, 
+    useUnifiedTopology: true, 
+    useCreateIndex: true,
+    useFindAndModify: false
+})
+    .then(console.log('mongodb connected'))
+    .catch(err => console.log(err))
 
 
 // const db = mongoose.connection
