@@ -25,18 +25,18 @@ const morgan = require("morgan");
 
 var JWT_SECRET = 'abc123'
 
-// class error {
-//     constructor() {
-//         this.count = 0;
-//         this.lowesCount = 0;
-//         this.items = {};
-//     }
+class queueOffline {
+    constructor() {
+        this.count = 0;
+        this.lowesCount = 0;
+        this.items = {};
+    }
 
-//     enqueue(element) {
-//         this.items[this.count] = element;
-//         this.count++;
-//     }
-// }
+    enqueue(element) {
+        this.items[this.count] = element;
+        this.count++;
+    }
+}
 
 
 
@@ -465,20 +465,27 @@ const io = require("socket.io")(server, {
 
 
 
-  
+    const offline = new queueOffline
     //send and get message
     socket.on("sendMessage", ({ sender, senderPicture, receiverId, message }) => {
       const initiator = getUser(sender);
-      const receiver = getUser(receiverId);
-      const finalreceptors = [ initiator.socketId, receiver.socketId,]
+      const findreceiver = getUser(receiverId)
+      console.log(findreceiver)
+
+      const receiver =  findreceiver === undefined ?  offline.enqueue( {sender,
+            senderPicture,
+            message,}) : getUser(receiverId)
+      console.log(queueOffline.count, queueOffline.items)
+      const finalreceptors = [ initiator.socketId, receiver.socketId]
       console.log(sender, senderPicture, receiverId, message )
       console.log(finalreceptors)
- 
-    io.to(finalreceptors).emit("getUserMessage", {
-        sender,
-        senderPicture,
-        message,
-      });
+
+    
+      io.to(finalreceptors).emit("getUserMessage", {
+          sender,
+          senderPicture,
+          message,
+        });
     });
  
 
@@ -535,6 +542,8 @@ const io = require("socket.io")(server, {
       io.emit("getUsers", users);
     });
   });
+
+  
 
 
   // listen on port

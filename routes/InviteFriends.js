@@ -7,7 +7,7 @@ const nodemailer = require("nodemailer")
 
 
 
-router.post("/inviteName/:senderId", async(req, res) => {
+router.post("/inviteName/:senderId", async(req, res, next) => {
     const { name } = req.body
     const { senderId } = req.params
     const user = await User.findOne({ name })
@@ -36,6 +36,8 @@ router.post("/inviteName/:senderId", async(req, res) => {
     }
     }    
 })
+
+
 
 
 router.post("/sendToMail/:senderId", async(req, res) => {
