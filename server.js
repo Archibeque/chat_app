@@ -23,7 +23,7 @@ const morgan = require("morgan");
 
 dotenv.config();
 
-var JWT_SECRET = 'abc123'
+// var JWT_SECRET = 'abc123'
 
 class queueOffline {
     constructor() {
