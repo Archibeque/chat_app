@@ -1,11 +1,11 @@
-const express = require("express");
-const mongoose = require("mongoose");
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-const validator = require("validator");
-const isEmpty = require("is-empty");
-const User = require("./users");
-const router = express.Router();
+// const express = require("express");
+// const mongoose = require("mongoose");
+// const bcrypt = require("bcryptjs");
+// const jwt = require("jsonwebtoken");
+// const validator = require("validator");
+// const isEmpty = require("is-empty");
+// const User = require("./users");
+// const router = express.Router();
 
 // const signToken = userID => {
 //     return jwt.sign({
@@ -20,7 +20,7 @@ const router = express.Router();
 
 
 
-module.exports = router;
+// module.exports = router;
 
 
 // User.findOne({ email }).then((user) => {

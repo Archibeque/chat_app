@@ -54,9 +54,10 @@ router.post("/register", async (req, res) => {
 
     //       }
     // }),
-    User.findOne({ email: email })
+    await User.findOne({ email: email })
       .then((user) => {
         if (user) {
+          console.log(user)
           errors.enqueue({ msg: "Email is already registered" });
           // res.render('index', {errors	})
           // var displayError = Object.assign({}, ...errors)
