@@ -8,7 +8,6 @@ const jwt = require("jsonwebtoken")
 // const bcrypt = require("bcryptjs");
 const http = require("http")
 var mongoAdapter = require('socket.io-adapter-mongo');
-const passport = require("passport")
 var sess = require('express-session')
 const usersRouter = require('./routes/users');
 const Pusher = require("pusher");
