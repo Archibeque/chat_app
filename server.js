@@ -64,19 +64,16 @@ app.use('', require('./routes/Friend'))
 
 
 //dbconfig
-const connection_url = 'mongodb+srv://nnadidblord:badboyz912@cluster0.xr77h.mongodb.net/chatbackend?retryWrites=true&w=majority'
-// const connection_url = 'mongodb://localhost:27017/emmanuel'
+const connection_url = "mongodb+srv://nnadidblord:badboyz912@cluster0.xr77h.mongodb.net/chatbackend?retryWrites=true&w=majority"
 
 const dba =  mongoose.connect(connection_url, {
     useNewUrlParser: true, 
-    useUnifiedTopology: true, 
+    // useUnifiedTopology: true, 
     // useCreateIndex: true,
     // useFindAndModify: false 
 })
-// dba.connection("open", console.log("mongodb connected"))
-// const data = dba.db("chatbackend")
-    .then(console.log('mongodb connected'))
-    .catch(err => console.log(err))
+.then(console.log('mongodb connected'))
+.catch(err => console.log(err))
 
 
 // const db = mongoose.connection
