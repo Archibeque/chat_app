@@ -17,7 +17,7 @@ const morgan = require("morgan");
 
 
 
-dotenv.config();
+// dotenv.config();
 
 // var JWT_SECRET = 'abc123'
 
@@ -64,7 +64,7 @@ app.use('', require('./routes/Friend'))
 
 
 //dbconfig
-const connection_url = 'mongodb+srv://dblord:ready007@cluster0.xr77h.mongodb.net/chatbackenddb?retryWrites=true&w=majority'
+// const connection_url = 'mongodb+srv://dblord:ready007@cluster0.xr77h.mongodb.net/chatbackenddb?retryWrites=true&w=majority'
 // const connection_url = 'mongodb://localhost:27017/emmanuel'
 
 const dba =  mongoose.connect(process.env.MONGO_URI, {
