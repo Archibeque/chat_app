@@ -17,7 +17,7 @@ const morgan = require("morgan");
 
 
 
-// dotenv.config();
+dotenv.config();
 
 // var JWT_SECRET = 'abc123'
 
