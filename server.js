@@ -69,7 +69,7 @@ const connection_url = 'mongodb+srv://nnadidblord:badboyz912@cluster0.xr77h.mong
 
 const dba =  mongoose.connect(connection_url, {
     useNewUrlParser: true, 
-    // useUnifiedTopology: true, 
+    useUnifiedTopology: true, 
     // useCreateIndex: true,
     // useFindAndModify: false 
 })
