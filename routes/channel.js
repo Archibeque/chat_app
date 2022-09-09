@@ -9,39 +9,21 @@
 router.post('/channel', async (req, res) => {
     console.log(req.body)
     const dbData = req.body.channelName
-    await messages.create({channelName: dbData, user: req.body.user.id, pool: req.body.user.id}),
-    await User.findOneAndUpdate(
-        { _id:  req.body.user.id },
+    try {
+        const createChannel = await messages.create({channelName: dbData, user: req.body.user, pool: req.body.user});
+
+        const createAdmin = await User.findOneAndUpdate(
+        { _id:  req.body.user },
         { $push: { isAdmin: req.body.channelName} },
         {upsert: true})
+        res.status(201).json(createChannel)
         
-        .then((err,data) =>{
-            if(err){
-                res.status(500).send(err)
-            }else{
-                console.log(data)
-               
-            }
-        })
-        .catch(err => console.log(err))
+    } catch (error) {
+        console.log(error)
+    }
     
-
-    // await User.findOneAndUpdate(
-    //     { _id:  req.body.user.id },
-    //     { $push: { isAdmin: data.channelName} },
-    //     {upsert: true},
-    //     (err,data) => {
-    //         if (err) {
-    //             console.log(err)
-    //             res.status(500).send(err)
-    //         }
-    //         else{
-    //             console.log(data)
-    //             res.status(200).send(data)
-    //         }
-    //     })
         
-
+        
 })
 
 // get group channels a particular user belongs to

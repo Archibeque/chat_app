@@ -64,19 +64,15 @@ app.use('', require('./routes/Friend'))
 
 
 //dbconfig
-const connection_url = "mongodb+srv://nnadidblord:badboyz912@cluster0.xr77h.mongodb.net/chatbackend?retryWrites=true&w=majority"
-
-const dba =  mongoose.connect(connection_url, {
-    useNewUrlParser: true, 
-    // useUnifiedTopology: true, 
-    // useCreateIndex: true,
-    // useFindAndModify: false 
-})
-.then(console.log('mongodb connected'))
-.catch(err => console.log(err))
+// const connection_url = "mongodb+srv://nnadidblord:badboyz912@cluster0.xr77h.mongodb.net/chatbackend?retryWrites=true&w=majority"
+// const connection_url = "mongodb://localhost:27017/emmanuel"
+const dba = mongoose.connect(MONGO_URI, {
+        useNewUrlParser: true
+    })
+    .then( console.log("connected to mongodb") )
+    .catch(err => console.log(err) )
 
 
-// const db = mongoose.connection
 
 
 //
@@ -266,22 +262,24 @@ const io = require("socket.io")(server, {
     socket.on("sendMessage", ({ sender, senderPicture, receiverId, message }) => {
       const initiator = getUser(sender);
       const findreceiver = getUser(receiverId)
-      console.log(findreceiver)
 
-      const receiver =  findreceiver === undefined ?  offline.enqueue( {sender,
+      const receiver =  [initiator.socketId,  findreceiver === undefined ? offline.enqueue( {sender,
             senderPicture,
-            message,}) : getUser(receiverId)
-      console.log(queueOffline.count, queueOffline.items)
-      const finalreceptors = [ initiator.socketId, receiver.socketId]
-      console.log(sender, senderPicture, receiverId, message )
-      console.log(finalreceptors)
+            message,})  : getUser(receiverId)]
+        
+      console.log(offline)
 
-    
-      io.to(finalreceptors).emit("getUserMessage", {
-          sender,
-          senderPicture,
-          message,
-        });
+    //   const finalreceptors = [ initiator.socketId, receiver.socketId]
+    //   console.log(sender, senderPicture, receiverId, message )
+    //   console.log(finalreceptors)
+
+        // if(socket.connected){
+        io.to(receiver).emit("getUserMessage", {
+            sender,
+            senderPicture,
+            message,
+            });
+    // }
     });
  
 
@@ -316,13 +314,15 @@ const io = require("socket.io")(server, {
 
 
 
-    socket.on("createChannel", ({ creator, channelName }) => {
+    socket.on("createChannel", ({ channelId, creator, channelName }) => {
         const creater = getUser(creator);
-        console.log(creator, channelName )
+        const receiver = creater.socketId
+        console.log("from socks "+creater, channelName )
 
-        io.to(creater.socketId).emit("getCreatedChannel", {
-          creator,
-          channelName,
+        io.to(receiver).emit("getCreatedChannel", {
+            channelId,
+            creator,
+            channelName,
         });
 
       });
