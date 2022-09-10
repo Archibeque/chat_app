@@ -14,6 +14,7 @@ class error {
     this.items[this.count] = element;
     this.count++;
   }
+  
 }
 
 // // auth

@@ -315,11 +315,11 @@ const io = require("socket.io")(server, {
 
 
     socket.on("createChannel", ({ channelId, creator, channelName }) => {
-        const creater = getUser(creator);
-        const receiver = creater.socketId
-        console.log("from socks "+creater, channelName )
+        // const creater = getUser(creator);
+        // const receiver = [creater.socketId]
+        // console.log("from socks "+creater, channelName )
 
-        io.to(receiver).emit("getCreatedChannel", {
+        io.emit("getCreatedChannel", {
             channelId,
             creator,
             channelName,
