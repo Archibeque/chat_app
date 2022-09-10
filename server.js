@@ -64,9 +64,9 @@ app.use('', require('./routes/Friend'))
 
 
 //dbconfig
-// const connection_url = "mongodb+srv://nnadidblord:badboyz912@cluster0.xr77h.mongodb.net/chatbackend?retryWrites=true&w=majority"
+const connection_url = "mongodb+srv://nnadidblord:badboyz912@cluster0.xr77h.mongodb.net/chatbackend?retryWrites=true&w=majority"
 // const connection_url = "mongodb://localhost:27017/emmanuel"
-const dba = mongoose.connect(process.env.MONGO_URI, {
+const dba = mongoose.connect(connection_url, {
         useNewUrlParser: true
     })
     .then( console.log("connected to mongodb") )
