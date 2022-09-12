@@ -224,7 +224,7 @@ app.get("/findUsers/:senderId", async(req, res) => {
 
 const io = require("socket.io")(server, {
     cors: {
-      origin: process.env.CORS,
+      origin: "https://tapchat-app.netlify.app",
     },
   });
 
